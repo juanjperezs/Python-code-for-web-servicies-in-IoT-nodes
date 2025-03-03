@@ -498,6 +498,7 @@ def data5():
         Sample.append(i[1])
     return jsonify(x=Sample, y5=Mq5)
 
+# Route for fetching data for sensor Mq9
 @app.route('/data6', methods=['GET','POST'])
 def data6():
     global result 
@@ -512,6 +513,7 @@ def data6():
     # print(Sample)
     return jsonify(x=Sample,y6=Mq9)
 
+# Route for fetching data for sensor Mq7
 @app.route('/data7', methods=['GET','POST'])
 def data7():
     global result 
@@ -526,6 +528,7 @@ def data7():
     # print(Sample)
     return jsonify(x=Sample,y7=Mq7)
 
+# Route for fetching data for sensor Mq8
 @app.route('/data8', methods=['GET','POST'])
 def data8():
     global result 
@@ -544,6 +547,7 @@ id_ip_nariz = {}
 
 starting_time = 0
 
+# Route to receive the ip address form the IoT device
 @app.route('/ip', methods=['POST'])
 def json():
     global id_ip_nariz, ip_nariz, starting_time
