@@ -1,5 +1,5 @@
 # This script is used for managing the IoT nodes using web services.
-# It runs in the IoT device.
+# It runs in a raspberry pi connected to an electronic nose.
 import time
 from datetime import datetime
 import serial.tools.list_ports
