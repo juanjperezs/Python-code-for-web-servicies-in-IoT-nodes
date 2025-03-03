@@ -1,5 +1,6 @@
-
-'''PYTHON SCRIPT TO SUBSCRIBE TO A TOPIC AND INSERT INTO MYSQL DATABASE'''
+# Python file that runs in the data server.
+# The program gets the data from the mqtt broker
+# and saves the data in a database.
 
 import mysql.connector 
 import paho.mqtt.client as mqtt
