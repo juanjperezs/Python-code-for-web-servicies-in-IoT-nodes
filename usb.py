@@ -1,3 +1,5 @@
+# This script is used for managing the IoT nodes using web services.
+# It runs in the IoT device.
 import time
 from datetime import datetime
 import serial.tools.list_ports
@@ -53,11 +55,10 @@ users = {
 
 Nariz_ID = "Nariz1"
 
+#Control of a OLED display via I2C
 seriali2c = i2c(port=1, address=0x3C)
-
 device = sh1106(seriali2c)
 device.contrast(255)
-
 font_path = str('/home/rasbe/Documentos/Codigo_python/oled-sh1106/opt/oled/fonts/Roboto-Light.ttf')
 font12 = ImageFont.truetype(font_path, 11)
 font14 = ImageFont.truetype(font_path, 14)
@@ -74,6 +75,7 @@ class SimpleForm(FlaskForm):
     analisis = SelectField('Analisis', choices=[(1, 'Real Time'), (2, 'ADC'), (3, 'Calibration'), (4, 'eNose Study')])
     submit = SubmitField('Submit')
 
+# This function calculates the time difference between two timestamps
 def calcTime(enter,exit):
     format="%H:%M:%S"
     #Parsing the time to str and taking only the hour,minute,second (without miliseconds)
@@ -84,6 +86,7 @@ def calcTime(enter,exit):
     exitTime = datetime.strptime(exitStr, format)
     return exitTime - enterTime
 
+# This function retrieves the IP address of the device
 def get_ip():
     global Nariz_ID
     cmd = "hostname -I | awk '{print $2}'"
@@ -99,12 +102,14 @@ def get_ip():
         print("No se pudo enviar IP")
         return "IP:  " + str(IP).rstrip("\r\n")+"\r\nSin conexion al servidor\r\n"
 
+# This function checks if there is an active internet connection
 def internet_connection():
     try:
         return subprocess.run(['wget','-q','--spider','www.goole.com'],timeout=5).returncode == 0
     except subprocess.TimeoutExpired:
         return False
 
+# This function reboots the system
 def reboot():
     try:
         return os.system('sudo reboot')
@@ -112,6 +117,7 @@ def reboot():
         print("No se pudo reiniciar")
         return False
 
+# This function continuously checks for internet connection and reboots if not connected
 def rebooting():
     while True:
         reintentos = 0
@@ -138,14 +144,14 @@ def rebooting():
                     draw.text((0, 45),  msg3, font=font12, fill=255)
         time.sleep(20)
           
-
-
+# This function retrieves the password for a given username
 @auth.get_password
 def get_pw(username):
     if username in users:
         return users.get(username)
     return None
 
+# This route renders the main page after login
 @app.route("/")
 @auth.login_required
 def hello():
@@ -167,6 +173,7 @@ def hello():
 
     return render_template('index.html', **templateData)
 
+# This route handles the connection of the sensor (Nariz)
 @app.route("/conectar_nariz", methods=['GET', 'POST'])
 def conectar_nariz():
     # Use the Broadcom SOC channel, which maps pin numbers like on the Pi
@@ -228,6 +235,7 @@ Enviar_nube = False
 Tabla = ""
 Basedatos = ""
 
+# This route renders the form for user input
 @app.route("/form", methods=['GET', 'POST'])
 def form():
     global Nombre_fichero, Nombre_muestras, Tipo_analisis, Ip_Servidor, Enviar_nube, Tabla, Basedatos
@@ -255,6 +263,7 @@ def form():
 
     return render_template('form.html', **templateData, form=user_form)
 
+# This background thread sends data to the clients
 def background_thread(event):
     """Example of how to send server generated events to clients."""
     global thread
@@ -279,10 +288,10 @@ def background_thread(event):
 
     muestreo_ini()
 
-    # Obtener la hora actual
+    # Current time
     enter = datetime.datetime.now()
 
-    # Imprimir la hora actual
+    # Print current time
     print("La hora actual es:", enter)
     
     print("Puerto serie")
@@ -414,10 +423,12 @@ def background_thread(event):
         if ser:
             ser.close()
 
+# This route renders the sockets page
 @app.route("/sockets")
 def sockets():
     return render_template('sockets.html', async_mode=socketio.async_mode)
 
+# This event handles client messages
 #@socketio.event
 @socketio.on('my_event')
 def my_event(message):
@@ -426,12 +437,13 @@ def my_event(message):
     duration = datetime.timedelta(hours=0, minutes=0, seconds=0)
     emit('my_response',  {'data': str(duration), 'count': 0})
 
-# Receive the test request from client and send back a test response
+# This event handles stop messages from the client
 @socketio.on('stop_message')
 def handle_message(data):
     print('received message: ' + str(data))
     emit('stop_message', {'data': 'Se ha enviado la señal de parada'})
 
+# This event handles client disconnections
 @socketio.on('disconnect')
 def test_disconnect():
     print('Client disconnected')
@@ -442,6 +454,7 @@ def test_disconnect():
             thread.join()
             thread = None
 
+# This event handles client connections
 #@socketio.event
 @socketio.on('connect')
 def connect():
@@ -452,6 +465,7 @@ def connect():
             thread_event.set()
             thread = socketio.start_background_task(background_thread, thread_event)
 
+# This function initializes the sampling process
 def muestreo_ini():
     global Nombre_fichero, Nombre_muestras, Tipo_analisis, ser
 
@@ -488,6 +502,8 @@ def muestreo_ini():
     df = pd.DataFrame(column_names).T
     df.to_excel(file_name_xls, index=False, header=False)
 
+
+# This route renders the completion page
 @app.route("/completado")
 def completado():
 
@@ -511,6 +527,7 @@ def completado():
 
     return render_template('completado.html', **templateData)
 
+# This route handles file download requests
 @app.route("/descargar")
 def descargar():
     global Nombre_fichero
