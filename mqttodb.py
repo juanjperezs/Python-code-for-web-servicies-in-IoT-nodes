@@ -8,29 +8,22 @@ import datetime
 
 
 
-
-
 #ON_CONNECT 
 def on_connect(mqttc, obj, flags, rc):
     print("rc: " + str(rc))
 
 # ON_MESSAGE 
-# Example: 
-#def on_message(mqttc, obj, msg):
-#    print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
-
 def on_message(mqttc, obj, msg):
-#TO INSERT FOR A PARTICULAR TOPIC BASED ON DB 
+    #TO INSERT FOR A PARTICULAR TOPIC BASED ON DB 
     #global connection
     #SQL CONNECTOR 
     mydb = mysql.connector.connect(
         host="localhost",
-        user="rasbe",
-        password="mas12%i&&",
+        user="x",
+        password="x",
     )
  
     mycursor = mydb.cursor()
-
     print(msg.payload.decode("utf-8"))
     d=json.loads(msg.payload.decode("utf-8"))
     ts = datetime.datetime.now()
@@ -40,7 +33,6 @@ def on_message(mqttc, obj, msg):
     Nariz_ID = Lista_Topic[0]
     Basededatos = Lista_Topic[1]
     Tabla = Lista_Topic[2]
-    #Name_table = "'"+Name_table+"'"
     print(Lista_Topic)
     print(Nariz_ID)
     print(Basededatos)
@@ -86,7 +78,7 @@ def on_message(mqttc, obj, msg):
 
     if Index==1:
 		
-        #CREAR BASE DE DATOS SI NO EXISTE
+        #CREATE DATABASE IF NOT EXISTS
         sqldrop = "CREATE DATABASE IF NOT EXISTS " + Basededatos
         print(sqldrop)
         mycursor.execute(sqldrop)
@@ -94,7 +86,7 @@ def on_message(mqttc, obj, msg):
         print("result:")
         print(result)
 
-        #ABRIR BASE DE DATOS
+        #OPEN DATABASE
         sqldrop = "USE " + Basededatos
         print(sqldrop)
         mycursor.execute(sqldrop)
@@ -103,7 +95,7 @@ def on_message(mqttc, obj, msg):
         print(result)
 
         
-        #ELIMINAR SI EXISTE
+        #DROP TABLE IF EXISTS
         sqldrop = "DROP TABLE IF EXISTS " + Tabla
         print(sqldrop)
         mycursor.execute(sqldrop)
@@ -111,7 +103,7 @@ def on_message(mqttc, obj, msg):
         print("result:")
         print(result)
 
-        #CREAR SI NO EXISTE
+        #CREATE TABLE IF NOT EXISTS
         create_table_query = "CREATE TABLE IF NOT EXISTS " 
         create_table_query += Tabla
         create_table_query += " (Ind int, Sample int, Power int, Mq135 int, Mq2 int, Mq3 int, Mq4 int, Mq5 int, Mq9 int, Mq7 int, Mq8 int, TempDS DECIMAL(5,2), TempDHT DECIMAL(5,2), Humidity DECIMAL(5,2), Sample_Name VARCHAR(10), Nariz_ID VARCHAR(10), Fecha VARCHAR(20), PRIMARY KEY (Ind))"
@@ -121,7 +113,7 @@ def on_message(mqttc, obj, msg):
         print("result:")
         print(result)
 
-        #COMPROBAR SI EXISTE
+        #CHECK IF THE TABLE EXISTS
         stmt="SHOW TABLES LIKE '" + Tabla +"'"
         print(stmt)
         mycursor.execute(stmt)
@@ -133,7 +125,7 @@ def on_message(mqttc, obj, msg):
         Nariz_ID = ""
         Date = ""
 	
-    #ABRIR BASE DE DATOS
+    #OPEN DATABASE
     sqldrop = "USE " + Basededatos
     print(sqldrop)
     mycursor.execute(sqldrop)
@@ -141,7 +133,7 @@ def on_message(mqttc, obj, msg):
     print("result:")
     print(result)
     
-	#INSERTAR NUEVA FILA
+    #INSERT A NEW FILE
     sql = "INSERT INTO "+ Tabla + " (Ind,Sample,Power,Mq135,Mq2,Mq3,Mq4,Mq5,Mq9,Mq7,Mq8,TempDS,TempDHT,Humidity,Sample_Name,Nariz_ID,Fecha) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
     val = (Index,Sample,Power,Mq135,Mq2,Mq3,Mq4,Mq5,Mq9,Mq7,Mq8,TempDS,TempDHT,Humidity,Sample_Name,Nariz_ID,Date)
     print("sql is ",sql)
@@ -173,17 +165,17 @@ mqttc.on_message = on_message
 mqttc.on_connect = on_connect
 mqttc.on_publish = on_publish
 mqttc.on_subscribe = on_subscribe
+
 # Uncomment to enable debug messages
 # mqttc.on_log = on_log
-mqttc.username_pw_set("nariz", "electronica")
+mqttc.username_pw_set("x", "x")
 mqttc.connect("localhost", 1883, 60)
 mqttc.subscribe("#", 0)
 
 mqttc.loop_forever()
 
 
-#INSERTAR
-
+#INSERT
 # ~ Index = 1
 # ~ Sample = 2
 # ~ Power = 3
